@@ -27,6 +27,8 @@ public class GlobalExceptionHandler {
         return detail;
     }
 
+    // Fires for method-level validation failures not covered by ConstraintViolationException
+    // (e.g., cross-parameter constraints, or Spring-level validation in WebFlux contexts)
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ProblemDetail handleMethodValidation(HandlerMethodValidationException ex) {
         ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
@@ -34,10 +36,18 @@ public class GlobalExceptionHandler {
         return detail;
     }
 
+    // Fires for @PathVariable and @RequestParam constraint violations when the
+    // controller class has @Validated (Spring Framework 7 throws this, not HandlerMethodValidationException)
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex) {
         ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         detail.setTitle("Validation failed");
+        Map<String, String> errors = ex.getConstraintViolations().stream()
+            .collect(Collectors.toMap(
+                v -> v.getPropertyPath().toString(),
+                v -> v.getMessage(),
+                (a, b) -> a));
+        detail.setProperty("errors", errors);
         return detail;
     }
 
