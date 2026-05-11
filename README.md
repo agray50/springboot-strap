@@ -74,6 +74,6 @@ Integration tests use Testcontainers — Docker must be running, but the app doe
 
 ## API docs
 
-Swagger UI: `http://localhost:8080/swagger-ui.html`
+Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 
 OpenAPI JSON: `http://localhost:8080/v3/api-docs`
